@@ -1,0 +1,24 @@
+
+read_verilog ../test_add.v
+
+hierarchy -check -top top_signed
+rename top_signed top
+
+#hierarchy -check -top top_unsigne
+#rename top_unsigned top
+
+copy top top_gold
+select top
+
+write_rtlil top.0.rtlil
+techmap -map ../../src/add_reduce.v -D Y_MIN_WIDTH=4 -D REDUCE_SIGNED=1
+techmap -autoproc -map ../../src/add_split.v -D ADD_MAXWIDTH=4
+show -signed -width -stretch -pause
+clean -purge
+show -signed -width -stretch -pause
+write_rtlil top.1.rtlil
+
+equiv_make top_gold top top_equiv
+select top_equiv
+equiv_simple
+equiv_status -assert

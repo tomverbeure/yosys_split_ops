@@ -1,0 +1,28 @@
+read_verilog test.v
+rename top_unsigned top_unsigned_gold
+rename top_signed top_signed_gold
+
+read_verilog test_split.v
+rename top_unsigned top_unsigned_split
+rename top_signed   top_signed_split
+
+# Create a single design with $equiv cells on nets that it expects to
+# be equivalent
+equiv_make top_unsigned_gold top_unsigned_split equiv_unsigned
+equiv_make top_signed_gold   top_signed_split   equiv_signed
+
+# Remove the old top_gold and top_split designs
+
+#hierarchy -top equiv_unsigned
+hierarchy -top equiv_signed
+
+# Remove some dummy buffer nets.
+clean -purge
+
+# Prove equivalence of all $equiv cells
+# When equivalent, one of the two branches is decoupled.
+equiv_simple
+
+equiv_status
+
+
